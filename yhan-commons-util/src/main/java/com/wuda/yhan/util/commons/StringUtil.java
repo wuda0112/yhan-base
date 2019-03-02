@@ -8,6 +8,11 @@ package com.wuda.yhan.util.commons;
 public class StringUtil {
 
     /**
+     * 空字符串.
+     */
+    public static String EMPTY_STRING = "";
+
+    /**
      * 大小写枚举.
      */
     public static enum CaseEnum {

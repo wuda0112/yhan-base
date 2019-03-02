@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/yhan-base.iml" filepath="$PROJECT_DIR$/yhan-base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yhan-commons-lang/yhan-commons-lang.iml" filepath="$PROJECT_DIR$/yhan-commons-lang/yhan-commons-lang.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yhan-commons-util/yhan-commons-util.iml" filepath="$PROJECT_DIR$/yhan-commons-util/yhan-commons-util.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yhan-spring-integration-util/yhan-spring-integration-util.iml" filepath="$PROJECT_DIR$/yhan-spring-integration-util/yhan-spring-integration-util.iml" />
+    </modules>
+  </component>
+</project>
