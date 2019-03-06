@@ -1,10 +1,15 @@
 package com.wuda.yhan.util.commons;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * bean utils.
@@ -13,106 +18,154 @@ import java.util.List;
  */
 public class BeanUtils {
 
-    /**
-     * 获取POJO中属性的信息.
-     *
-     * @param clazz
-     *         POJO clazz
-     * @param mustHasGetter
-     *         返回的属性是否必须包含get方法
-     * @param mustHasSetter
-     *         返回的属性是否必须包含set方法
-     * @return 属性信息, null-如果该POJO中不包含任何属性,或者不满足给定条件
-     */
-    public static List<PojoFieldInfo> getFieldInfoList(Class<?> clazz, boolean mustHasGetter, boolean mustHasSetter) {
-        Field[] fields = clazz.getDeclaredFields();
-        if (fields == null || fields.length == 0) {
-            return null;
-        }
-        List<PojoFieldInfo> list = new ArrayList<>(fields.length);
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            Method getter = getter(clazz, fieldName);
-            if (getter == null && mustHasGetter) {
-                continue;
-            }
-            Method setter = setter(clazz, fieldName);
-            if (setter == null && mustHasSetter) {
-                continue;
-            }
-            PojoFieldInfo pojoFieldInfo = new PojoFieldInfo();
-            pojoFieldInfo.setField(field);
-            pojoFieldInfo.setGetter(getter);
-            pojoFieldInfo.setSetter(setter);
-            list.add(pojoFieldInfo);
-        }
-        return list;
-    }
+	/**
+	 * 注解包含策略.
+	 * 
+	 * @author wuda
+	 *
+	 */
+	public enum AnnotationContailsPolicy {
+		/**
+		 * 必须包含所有给定的注解.
+		 */
+		CONTAILS_ALL,
+		/**
+		 * 至少包含其中一个注解.
+		 */
+		AT_LEAST_ONE,
+		/**
+		 * 一个都不能包含.
+		 */
+		CONTAINS_ZERO;
+	}
 
-    /**
-     * 返回属性的get方法.
-     *
-     * @param clazz
-     *         clazz
-     * @param fieldName
-     *         属性名称
-     * @return get方法, 如果没有该属性, 或者该属性没有get方法, 则返回null.
-     */
-    public static Method getter(Class<?> clazz, String fieldName) {
-        String getterName = JavaNamingUtil.genGetterMethodName(fieldName);
-        Method getter;
-        try {
-            getter = clazz.getMethod(getterName);
-        } catch (NoSuchMethodException e) {
-            getter = null;
-        }
-        return getter;
-    }
+	/**
+	 * 获取POJO中属性的信息.
+	 *
+	 * @param clazz                    POJO clazz
+	 * @param mustHasGetter            返回的属性是否必须包含get方法
+	 * @param mustHasSetter            返回的属性是否必须包含set方法
+	 * @param annotationClassSet       属性的注解
+	 * @param annotationContailsPolicy 对于给定的注解,该属性的包含策略
+	 * @return 属性信息, null-如果该POJO中不包含任何属性,或者不满足给定条件
+	 */
+	public static <T extends Annotation> List<PojoFieldInfo> getFieldInfoList(Class<?> clazz, boolean mustHasGetter,
+			boolean mustHasSetter, Set<Class<T>> annotationClassSet,
+			AnnotationContailsPolicy annotationContailsPolicy) {
+		Field[] fields = clazz.getDeclaredFields();
+		if (fields == null || fields.length == 0) {
+			return null;
+		}
+		List<PojoFieldInfo> list = new ArrayList<>(fields.length);
+		for (Field field : fields) {
+			List<Annotation> annotations = null;
+			if (annotationClassSet != null) {
+				annotations = getAnnotations(field, annotationClassSet, annotationContailsPolicy);
+				if (annotations == null) {
+					continue;
+				}
+			}
+			String fieldName = field.getName();
+			Method getter = getter(clazz, fieldName);
+			if (getter == null && mustHasGetter) {
+				continue;
+			}
+			Method setter = setter(clazz, fieldName);
+			if (setter == null && mustHasSetter) {
+				continue;
+			}
+			PojoFieldInfo pojoFieldInfo = new PojoFieldInfo();
+			pojoFieldInfo.setField(field);
+			pojoFieldInfo.setGetter(getter);
+			pojoFieldInfo.setSetter(setter);
+			pojoFieldInfo.setAnnotations(annotations);
+			list.add(pojoFieldInfo);
+		}
+		return list;
+	}
 
-    /**
-     * 返回属性的set方法.
-     *
-     * @param clazz
-     *         clazz
-     * @param fieldName
-     *         属性名称
-     * @return set方法, 如果没有该属性, 或者该属性没有set方法, 则返回null.
-     */
-    public static Method setter(Class<?> clazz, String fieldName) {
-        Method setter;
-        try {
-            Field field = clazz.getDeclaredField(fieldName);
-            String setterName = JavaNamingUtil.genSetterMethodName(fieldName);
-            setter = clazz.getMethod(setterName, field.getType());
-        } catch (NoSuchFieldException | NoSuchMethodException e) {
-            setter = null;
-        }
-        return setter;
-    }
+	/**
+	 * 返回属性的get方法.
+	 *
+	 * @param clazz     clazz
+	 * @param fieldName 属性名称
+	 * @return get方法, 如果没有该属性, 或者该属性没有get方法, 则返回null.
+	 */
+	public static Method getter(Class<?> clazz, String fieldName) {
+		String getterName = JavaNamingUtil.genGetterMethodName(fieldName);
+		Method getter;
+		try {
+			getter = clazz.getMethod(getterName);
+		} catch (NoSuchMethodException e) {
+			getter = null;
+		}
+		return getter;
+	}
 
-    /**
-     * 给pojo的属性填充值.pojo必须是标准的java bean,即属性必须拥有setter方法,并且是public访问权限,
-     * 通过调用属性的setter方法为属性赋值.
-     * 每个属性的值都是随机生成的.比如通过{@link RandomUtilsExt#randomChar()}生成随机的char.
-     *
-     * @param pojo
-     *         标准的java pojo
-     */
-    public static void fill(Object pojo) {
-        List<PojoFieldInfo> fieldInfos = getFieldInfoList(pojo.getClass(), false, true);
-        if (fieldInfos == null || fieldInfos.isEmpty()) {
-            return;
-        }
-        for (PojoFieldInfo fieldInfo : fieldInfos) {
-            Method setter = fieldInfo.getSetter();
-            Field field = fieldInfo.getField();
-            Object arg = RandomValueAdapter.random(field.getType(), 10);
-            try {
-                setter.invoke(pojo, arg);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException("给POJO填充值异常!POJO field= " + field + ", arg= " + arg, e);
-            }
-        }
-    }
+	/**
+	 * 返回属性的set方法.
+	 *
+	 * @param clazz     clazz
+	 * @param fieldName 属性名称
+	 * @return set方法, 如果没有该属性, 或者该属性没有set方法, 则返回null.
+	 */
+	public static Method setter(Class<?> clazz, String fieldName) {
+		Method setter;
+		try {
+			Field field = clazz.getDeclaredField(fieldName);
+			String setterName = JavaNamingUtil.genSetterMethodName(fieldName);
+			setter = clazz.getMethod(setterName, field.getType());
+		} catch (NoSuchFieldException | NoSuchMethodException e) {
+			setter = null;
+		}
+		return setter;
+	}
+
+	public static <T extends Annotation> List<Annotation> getAnnotations(Field field, Set<Class<T>> annotationClassSet,
+			AnnotationContailsPolicy annotationContailsPolicy) {
+		List<Annotation> list = new ArrayList<Annotation>();
+		for (Class<T> annotationClass : annotationClassSet) {
+			Annotation[] array = getAnnotation(field, annotationClass);
+			if (annotationContailsPolicy == AnnotationContailsPolicy.CONTAILS_ALL && (array == null || array.length == 0)) {
+				return null;
+			} else if (annotationContailsPolicy == AnnotationContailsPolicy.CONTAINS_ZERO
+					&& (array != null && array.length > 0)) {
+				return null;
+			}
+			Collections.addAll(list, array);
+		}
+		if (annotationContailsPolicy == AnnotationContailsPolicy.AT_LEAST_ONE && list.isEmpty()) {
+			return null;
+		}
+		return list;
+	}
+
+	public static <T extends Annotation> Annotation[] getAnnotation(Field field, Class<T> annotationClass) {
+		return field.getAnnotationsByType(annotationClass);
+	}
+
+	/**
+	 * 给pojo的属性填充值.pojo必须是标准的java bean,即属性必须拥有setter方法,并且是public访问权限,
+	 * 通过调用属性的setter方法为属性赋值.
+	 * 每个属性的值都是随机生成的.比如通过{@link RandomUtilsExt#randomChar()}生成随机的char.
+	 *
+	 * @param pojo 标准的java pojo
+	 */
+	public static void populateRandomValue(Object pojo) {
+		List<PojoFieldInfo> fieldInfos = null;
+		if (fieldInfos == null || fieldInfos.isEmpty()) {
+			return;
+		}
+		for (PojoFieldInfo fieldInfo : fieldInfos) {
+			Method setter = fieldInfo.getSetter();
+			Field field = fieldInfo.getField();
+			Object arg = RandomValueAdapter.random(field.getType(), 10);
+			try {
+				setter.invoke(pojo, arg);
+			} catch (IllegalAccessException | InvocationTargetException e) {
+				throw new RuntimeException("给POJO填充值异常!POJO field= " + field + ", arg= " + arg, e);
+			}
+		}
+	}
 
 }

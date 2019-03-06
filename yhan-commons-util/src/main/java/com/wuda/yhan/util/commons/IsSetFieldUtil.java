@@ -21,14 +21,14 @@ public class IsSetFieldUtil {
      * @return 所有调用过setter方法的属性, null - 如果没有任何field调用过setter方法,或者没有使用{@link IsSetField}特性
      */
     public static Field[] setterCalledFields(Object domain) {
-        Class clazz = domain.getClass();
-        Field[] allFields = clazz.getFields();
+        Class<?> clazz = domain.getClass();
+        Field[] allFields = clazz.getDeclaredFields();
         if (allFields == null || allFields.length == 0) {
             return null;
         }
         List<Field> setterCalledFields = new ArrayList<>();
         for (Field field : allFields) {
-            IsSetField isSetField = field.getAnnotation(IsSetField.class);
+            IsSetField isSetField = field.getDeclaredAnnotation(IsSetField.class);
             if (isSetField != null) {
                 field.setAccessible(true);
                 boolean isSet;

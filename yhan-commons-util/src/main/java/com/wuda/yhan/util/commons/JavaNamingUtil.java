@@ -25,7 +25,7 @@ public class JavaNamingUtil {
      *         名称中单词之间的分隔符
      * @return 驼峰命名
      */
-    public static String toHumpNaming(String name, char wordSeparator) {
+    public static String toCamelCase(String name, char wordSeparator) {
         if (name == null || name.isEmpty()) {
             return name;
         }

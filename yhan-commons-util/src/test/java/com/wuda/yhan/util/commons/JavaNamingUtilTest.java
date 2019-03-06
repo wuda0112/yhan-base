@@ -8,7 +8,7 @@ public class JavaNamingUtilTest {
     @Test
     public void toHumpNamingTest() {
         String origin = "product_name";
-        String translate = JavaNamingUtil.toHumpNaming(origin, '_');
+        String translate = JavaNamingUtil.toCamelCase(origin, '_');
         Assert.assertTrue(translate.equals("productName"));
     }
 

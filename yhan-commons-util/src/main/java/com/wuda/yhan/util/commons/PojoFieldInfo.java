@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * 描述POJO中属性的信息.
@@ -28,5 +30,9 @@ public class PojoFieldInfo {
      * 属性的set方法.
      */
     private Method setter;
+    /**
+     * 注解.
+     */
+    private List<Annotation> annotations;
 
 }
