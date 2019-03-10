@@ -102,4 +102,19 @@ public class RandomUtilsExt {
         return randomChar(Character.MIN_CODE_POINT, Character.MAX_CODE_POINT);
     }
 
+    /**
+     * 常用邮箱.
+     */
+    static String[] emailSuffix = new String[]{"@163.com", "@126.com", "@gmail.com", "@sina.com", "@sina.cn", "@qq.com"};
+
+    /**
+     * 随机给出一个邮箱后缀,即@符号以后(包含)的部分.比如: @163.com
+     *
+     * @return 随机的邮箱后缀
+     */
+    public static String randomEmailSuffix() {
+        int index = RandomUtils.nextInt(0, emailSuffix.length);
+        return emailSuffix[index];
+    }
+
 }
