@@ -6,21 +6,14 @@ import java.util.Arrays;
 
 public class IntIdMapTreeTest extends IntIdTreeTestBase{
 
-    IntIdTreeTestBase.IntIdElement root = new IntIdTreeTestBase.IntIdElement(-1, "root");
-    IntIdTreeTestBase.IntIdElement hn = new IntIdTreeTestBase.IntIdElement(1, "湖南");
-    IntIdTreeTestBase.IntIdElement zjj = new IntIdTreeTestBase.IntIdElement(2, "张家界");
-    IntIdTreeTestBase.IntIdElement gd = new IntIdTreeTestBase.IntIdElement(3, "广东");
-    IntIdTreeTestBase.IntIdElement gz = new IntIdTreeTestBase.IntIdElement(4, "广州");
-
     /**
      * 测试父子关系互换的情形.
      */
     @Test
     public void testSwitchRelationship() {
-        IntIdTreeTestBase.IntIdElement root = new IntIdTreeTestBase.IntIdElement(-1, "root");
-        IntIdMapTree<IntIdTreeTestBase.IntIdElement> tree = new IntIdMapTree<>(root);
-        IntIdTreeTestBase.IntIdElement parent = new IntIdTreeTestBase.IntIdElement(1, "parent");
-        IntIdTreeTestBase.IntIdElement child = new IntIdTreeTestBase.IntIdElement(2, "child");
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china);
+        IntIdTreeTestBase.IntIdPidElement parent = guangdong_province;
+        IntIdTreeTestBase.IntIdPidElement child = guangzhou;
 
         tree.createRelationship(parent, child);
         tree.createRelationship(child, parent);
@@ -31,11 +24,10 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase{
      */
     @Test
     public void testChildHasMultiParent() {
-        IntIdTreeTestBase.IntIdElement root = new IntIdTreeTestBase.IntIdElement(-1, "root");
-        IntIdMapTree<IntIdTreeTestBase.IntIdElement> tree = new IntIdMapTree<>(root);
-        IntIdTreeTestBase.IntIdElement parent = new IntIdTreeTestBase.IntIdElement(1, "parent");
-        IntIdTreeTestBase.IntIdElement child = new IntIdTreeTestBase.IntIdElement(2, "child");
-        IntIdTreeTestBase.IntIdElement fakeParent = new IntIdTreeTestBase.IntIdElement(3, "fakeParent");
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china);
+        IntIdTreeTestBase.IntIdPidElement parent = guangdong_province;
+        IntIdTreeTestBase.IntIdPidElement child = guangzhou;
+        IntIdTreeTestBase.IntIdPidElement fakeParent = hunan_province;
 
         tree.createRelationship(parent, child);
         tree.createRelationship(fakeParent, child);
@@ -46,32 +38,52 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase{
      */
     @Test
     public void test() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdElement> tree = getTree();
-        IntIdTreeTestBase.IntIdElement root = tree.getRoot();
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = getTree();
+        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
         print(tree, root.getId());
     }
 
     @Test
     public void getAncestorsTest() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdElement> tree = getTree();
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = getTree();
 
-        IntIdTreeTestBase.IntIdElement root = tree.getRoot();
+        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
         int[] ancestors = tree.getAncestor(root.getId(), 3);
         System.out.println(Arrays.toString(ancestors));
 
-        int[] zjjAncestors = tree.getAncestor(zjj.getId(), 4);
+        int[] zjjAncestors = tree.getAncestor(zhangjj.getId(), 4);
         System.out.println(Arrays.toString(zjjAncestors));
     }
 
-    private IntIdMapTree<IntIdTreeTestBase.IntIdElement> getTree() {
+    /**
+     * 测试正常情形.
+     */
+    @Test
+    public void testDepth() {
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china, true);
 
-        IntIdMapTree<IntIdTreeTestBase.IntIdElement> tree = new IntIdMapTree<>(root, true);
+        // 从下往上建立关系
+        tree.createRelationship(zhangjj, sangzhi);
+        tree.createRelationship(hunan_province, zhangjj);
+        tree.createRelationship(china, hunan_province);
 
-        tree.createRelationship(root, hn);
-        tree.createRelationship(hn, zjj);
+        tree.createRelationship(guangdong_province, guangzhou);
+        tree.createRelationship(china, guangdong_province);
 
-        tree.createRelationship(root, gd);
-        tree.createRelationship(gd, gz);
+
+        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
+        print(tree, root.getId());
+    }
+
+    private IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> getTree() {
+
+        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china, true);
+
+        tree.createRelationship(china, guangdong_province);
+        tree.createRelationship(guangdong_province, guangzhou);
+
+        tree.createRelationship(china, hunan_province);
+        tree.createRelationship(hunan_province, zhangjj);
 
         return tree;
     }

@@ -5,8 +5,20 @@ import com.koloboke.collect.map.hash.HashIntObjMaps;
 import com.wuda.yhan.util.commons.unique.IntIdPidObject;
 
 import java.util.List;
+import java.util.logging.Logger;
 
+/**
+ * 将具有ID/PID模式的数据生成{@link IntIdMapTree}树形结构.
+ * 因为ID/PID描述了上下级关系,因此根据这个特点可以很容易的生成树形结构.
+ *
+ * @author wuda
+ */
 public class IntIdPidObjectMapTreeBuilder {
+
+    /**
+     * logger.
+     */
+    private static Logger logger = Logger.getLogger(IntIdPidObjectMapTreeBuilder.class.getName());
 
     /**
      * 向已经存在的{@link IntIdMapTree}中添加新的数据.
@@ -19,25 +31,47 @@ public class IntIdPidObjectMapTreeBuilder {
             return;
         }
         HashIntObjMap<E> map = groupingById(elements);
-        for (E e : elements) {
-            int id = e.getId();
-            int pid = e.getPid();
-            E child = map.get(id);
-            if (child == null) {
-                child = tree.get(id);
+        for (E element : elements) {
+            int id = element.getId();
+            if (id == tree.getRoot().getId()) {
+                // 当前element是root,不需要建立关系
+                continue;
             }
-            E parent = map.get(pid);
-            if (parent == null) {
-                parent = tree.get(pid);
-            }
+            int pid = element.getPid();
+            E child = getFrom(map, tree, id);
+            E parent = getFrom(map, tree, pid);
             if (parent != null && child != null) {
                 tree.createRelationship(parent, child);
             } else {
-                // todo log
+                logger.warning("id = " + id + ", pid = " + pid + ", 至少有一个找不到对应的元素");
             }
         }
     }
 
+    /**
+     * 从给定的两个容器中查找ID对应的元素.
+     *
+     * @param map  map
+     * @param tree tree
+     * @param id   元素ID
+     * @param <E>  元素类型
+     * @return element
+     */
+    private <E extends IntIdPidObject> E getFrom(HashIntObjMap<E> map, IntIdMapTree<E> tree, int id) {
+        E node = map.get(id);
+        if (node == null) {
+            node = tree.get(id);
+        }
+        return node;
+    }
+
+    /**
+     * 根据ID分组,由于ID是唯一的,因此一个ID只对应一个对应的元素.
+     *
+     * @param elements list of element
+     * @param <E>      元素类型
+     * @return key - id , value - element
+     */
     private <E extends IntIdPidObject> HashIntObjMap<E> groupingById(List<E> elements) {
         int size = elements.size();
         HashIntObjMap<E> map = HashIntObjMaps.newMutableMap(size);

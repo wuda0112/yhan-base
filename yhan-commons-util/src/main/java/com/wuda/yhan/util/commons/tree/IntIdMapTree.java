@@ -9,7 +9,7 @@ import com.koloboke.collect.set.hash.HashIntSets;
 import com.wuda.yhan.util.commons.unique.IntIdObject;
 
 /**
- * 用Map的方式实现树形关系.
+ * 用Map的方式实现树形关系.树中节点都有一个唯一ID，并且是<code>int</code>类型.
  *
  * @param <E> 树中节点的类型
  * @author wuda
@@ -24,6 +24,10 @@ public class IntIdMapTree<E extends IntIdObject> {
      * 是否记录节点深度.
      */
     private boolean recDepth;
+    /**
+     * 没有深度.
+     */
+    public final int NO_DEPTH = -1;
     /**
      * 保存关系,子节点指向父节点.key - id ,value - parent id.
      */
@@ -115,7 +119,8 @@ public class IntIdMapTree<E extends IntIdObject> {
     }
 
     /**
-     * 设置节点的深度.节点的深度等于它父节点深度加一.
+     * 设置节点的深度.节点的深度等于它父节点深度加一.如果当前节点的深度发生变化,
+     * 那么它的所有子节点的深度也会相应的更新.
      *
      * @param node node
      */
@@ -124,11 +129,19 @@ public class IntIdMapTree<E extends IntIdObject> {
             int depth = 0;
             int id = node.getId();
             if (id != root.getId()) {
-                int pid = id2PidMap.get(id);
-                int parentDepth = id2DepthMap.get(pid);
+                int pid = getParent(id);
+                int parentDepth = getDepth(pid);
                 depth = parentDepth + 1;
             }
-            id2DepthMap.put(id, depth);
+            if (depth != getDepth(id)) {
+                // 深度发生变化才更新
+                id2DepthMap.put(id, depth);
+                // 更新当前节点下的所有子节点的深度
+                int[] children = getChildren(id);
+                if (children != null && children.length > 0) {
+                    for (int child : children) setDepth(get(child));
+                }
+            }
         }
     }
 
@@ -163,7 +176,7 @@ public class IntIdMapTree<E extends IntIdObject> {
      */
     public int getDepth(int id) {
         if (!recDepth) {
-            return 0;
+            return NO_DEPTH;
         }
         return id2DepthMap.get(id);
     }
@@ -252,15 +265,20 @@ public class IntIdMapTree<E extends IntIdObject> {
      * @param child  child
      */
     private void validateRelationship(E parent, E child) {
-        int oldParentId = id2PidMap.getOrDefault(child.getId(), NOT_EXIST);
-        if (oldParentId != NOT_EXIST && oldParentId != parent.getId()) {
-            throw new IllegalStateException("子节点[ ID = " + child.getId() + " ],已经拥有父节点( ID=" + oldParentId + " )," +
-                    "因此,不能将[ ID=" + parent.getId() + " ]的节点设置成它的父节点." +
+        int childId = child.getId();
+        if (childId == root.getId()) {
+            throw new IllegalStateException("root节点不能有父节点");
+        }
+        int parentId = parent.getId();
+        int oldParentId = id2PidMap.getOrDefault(childId, NOT_EXIST);
+        if (oldParentId != NOT_EXIST && oldParentId != parentId) {
+            throw new IllegalStateException("子节点[ ID = " + childId + " ],已经拥有父节点( ID=" + oldParentId + " )," +
+                    "因此,不能将[ ID=" + parentId + " ]的节点设置成它的父节点." +
                     "子节点只能有一个父节点");
         }
         if (alreadyHasRelationship(child, parent)) {
-            throw new IllegalStateException("想建立[ parent:" + parent.getId() + " -> child:" + child.getId() + " ]的父子关系," +
-                    "但是在树中已经存在[ parent:" + child.getId() + " -> child:" + parent.getId() + " ]的关系." +
+            throw new IllegalStateException("想建立[ parent:" + parentId + " -> child:" + childId + " ]的父子关系," +
+                    "但是在树中已经存在[ parent:" + childId + " -> child:" + parentId + " ]的关系." +
                     "父子关系不能互换");
         }
     }

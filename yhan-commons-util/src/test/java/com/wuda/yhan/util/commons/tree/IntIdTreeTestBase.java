@@ -1,6 +1,5 @@
 package com.wuda.yhan.util.commons.tree;
 
-import com.wuda.yhan.util.commons.unique.IntIdObject;
 import com.wuda.yhan.util.commons.unique.IntIdPidObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,18 +27,18 @@ class IntIdTreeTestBase {
     IntIdPidElement yunan_province = new IntIdPidElement(11, 1, "云南省");
 
     public List<IntIdPidElement> getElements() {
-        List<IntIdPidElement> nodes = new ArrayList<>();
-        nodes.add(china);
-        nodes.add(hunan_province);
-        nodes.add(zhangjj);
-        nodes.add(changsha);
-        nodes.add(sangzhi);
-        nodes.add(guangdong_province);
-        nodes.add(guangzhou);
-        nodes.add(dongguan);
-        nodes.add(hubei_province);
-        nodes.add(yunan_province);
-        return nodes;
+        List<IntIdPidElement> list = new ArrayList<>();
+        list.add(china);
+        list.add(hunan_province);
+        list.add(zhangjj);
+        list.add(changsha);
+        list.add(sangzhi);
+        list.add(guangdong_province);
+        list.add(guangzhou);
+        list.add(dongguan);
+        list.add(hubei_province);
+        list.add(yunan_province);
+        return list;
     }
 
     @Getter
@@ -50,18 +49,6 @@ class IntIdTreeTestBase {
 
         IntIdPidElement(int id, int pid, String name) {
             super(id, pid);
-            this.name = name;
-        }
-    }
-
-    @Getter
-    @Setter
-    static class IntIdElement extends IntIdObject {
-
-        String name;
-
-        IntIdElement(int id, String name) {
-            super(id);
             this.name = name;
         }
     }
@@ -85,14 +72,20 @@ class IntIdTreeTestBase {
         }
     }
 
-    void print(IntIdMapTree<? extends IntIdObject> tree, int id) {
+    /**
+     * 打印,从给定的ID所代表的节点开始.
+     *
+     * @param tree tree
+     * @param id   element id
+     */
+    void print(IntIdMapTree<IntIdPidElement> tree, int id) {
         int depth = tree.getDepth(id);
         String tab = "\t";
         for (int i = 0; i < depth; i++) {
             tab += "\t";
         }
-        IntIdObject element = tree.get(id);
-        System.out.println(tab + element.getId());
+        IntIdPidElement element = tree.get(id);
+        System.out.println(tab + element.getName());
         int[] children = tree.getChildren(id);
         if (children == null || children.length == 0) {
             return;
