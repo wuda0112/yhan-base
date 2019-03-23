@@ -12,7 +12,7 @@ public class IntIdObject implements NumberIdObject {
      */
     private int id;
 
-    IntIdObject(int id) {
+    public IntIdObject(int id) {
         this.id = id;
     }
 
