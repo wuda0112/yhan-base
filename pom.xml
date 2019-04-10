@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.wuda</groupId>
-        <artifactId>project-dependency</artifactId>
-        <version>1.0.1</version>
+        <groupId>io.github.wuda0112</groupId>
+        <artifactId>yhan-spring-boot-based-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>yhan-base</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>yhan-base</name>
@@ -46,12 +46,12 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.wuda</groupId>
+                <groupId>io.github.wuda0112</groupId>
                 <artifactId>yhan-commons-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.wuda</groupId>
+                <groupId>io.github.wuda0112</groupId>
                 <artifactId>yhan-spring-integration-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
