@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>yhan-base</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>yhan-base</name>
@@ -18,7 +18,7 @@
         <url>https://github.com/wuda0112/yhan-base</url>
         <connection>scm:git:git@github.com:wuda0112/yhan-base.git</connection>
         <developerConnection>scm:git:git@github.com:wuda0112/yhan-base.git</developerConnection>
-      <tag>release-1.0.0</tag>
+      <tag>HEAD</tag>
   </scm>
     <licenses>
         <license>

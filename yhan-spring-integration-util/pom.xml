@@ -4,7 +4,7 @@
     <parent>
         <groupId>io.github.wuda0112</groupId>
         <artifactId>yhan-base</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>yhan-spring-integration-util</artifactId>
