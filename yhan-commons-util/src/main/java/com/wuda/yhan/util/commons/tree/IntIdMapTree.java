@@ -8,6 +8,8 @@ import com.koloboke.collect.map.hash.HashIntObjMaps;
 import com.koloboke.collect.set.hash.HashIntSets;
 import com.wuda.yhan.util.commons.unique.IntIdObject;
 
+import java.util.function.Consumer;
+
 /**
  * 用Map的方式实现树形关系.树中节点都有一个唯一ID，并且是<code>int</code>类型.
  *
@@ -303,5 +305,26 @@ public class IntIdMapTree<E extends IntIdObject> {
     private void addNode(E node) {
         validateNode(node);
         id2NodeMap.put(node.getId(), node);
+    }
+
+    /**
+     * Perform a depth-first traversal through this node and its descendants
+     *
+     * @param fromId   开始节点ID
+     * @param consumer 对遍历过程中的每个节点执行的动作
+     */
+    public void traverse(int fromId, Consumer<E> consumer) {
+        E node = get(fromId);
+        if (node == null) {
+            return;
+        }
+        consumer.accept(node);
+        int[] children = getChildren(fromId);
+        if (children == null || children.length == 0) {
+            return;
+        }
+        for (int child : children) {
+            traverse(child, consumer);
+        }
     }
 }
