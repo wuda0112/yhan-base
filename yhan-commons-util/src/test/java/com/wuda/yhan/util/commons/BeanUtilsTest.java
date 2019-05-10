@@ -2,15 +2,12 @@ package com.wuda.yhan.util.commons;
 
 import lombok.ToString;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.wuda.yhan.util.commons.BeanUtils.AnnotationContailsPolicy;
+import com.wuda.yhan.util.commons.BeanUtils.AnnotationContainsPolicy;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.Repeatable;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +24,7 @@ public class BeanUtilsTest {
     @Test
     public void getFieldList() {
     	
-        List<PojoFieldInfo> list = BeanUtils.getFieldInfoList(SimplePojo.class, false, false,get(),AnnotationContailsPolicy.CONTAINS_ZERO);
+        List<PojoFieldInfo> list = BeanUtils.getFieldInfoList(SimplePojo.class, false, false,get(), AnnotationContainsPolicy.CONTAINS_ZERO);
         if (list != null && !list.isEmpty()) {
             for (PojoFieldInfo pojoFieldInfo : list) {
                 Method getter = pojoFieldInfo.getGetter();

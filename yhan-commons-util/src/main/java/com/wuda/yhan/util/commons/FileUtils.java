@@ -28,8 +28,7 @@ public class FileUtils {
         String canonicalName = clazz.getCanonicalName();
         String onlyPackageName = canonicalName.substring(0, canonicalName.lastIndexOf('.'));
         String packagePart = onlyPackageName.replaceAll("\\.", "\\" + File.separator);
-        return getUserDir()
-                + getMavenSrcMainJavaDir()
+        return getMavenSrcMainJavaDir()
                 + File.separator + packagePart;
     }
 
