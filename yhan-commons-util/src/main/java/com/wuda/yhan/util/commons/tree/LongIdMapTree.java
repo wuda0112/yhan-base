@@ -1,49 +1,47 @@
 package com.wuda.yhan.util.commons.tree;
 
-import com.koloboke.collect.IntCollection;
-import com.koloboke.collect.map.hash.HashIntIntMap;
-import com.koloboke.collect.map.hash.HashIntIntMaps;
-import com.koloboke.collect.map.hash.HashIntObjMap;
-import com.koloboke.collect.map.hash.HashIntObjMaps;
-import com.koloboke.collect.set.hash.HashIntSets;
-import com.wuda.yhan.util.commons.unique.IntIdObject;
+import com.koloboke.collect.LongCollection;
+import com.koloboke.collect.map.hash.*;
+import com.koloboke.collect.set.hash.HashLongSets;
+import com.wuda.yhan.util.commons.unique.LongIdObject;
 
 import java.util.function.Consumer;
 
 /**
- * 用Map的方式实现树形关系.树中节点都有一个唯一ID，并且是<code>int</code>类型.
+ * 用Map的方式实现树形关系.树中节点都有一个唯一ID，并且是<code>long</code>类型.
  *
  * @param <E> 树中节点的类型
  * @author wuda
  */
-public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree {
+public class LongIdMapTree<E extends LongIdObject> extends AbstractNumberIdMapTree {
 
     /**
      * 根节点.
      */
     private E root;
+
     /**
      * 保存关系,子节点指向父节点.key - id ,value - parent id.
      */
-    private HashIntIntMap id2PidMap;
+    private HashLongLongMap id2PidMap;
     /**
      * 保存关系,父节点指向它的所有字节点.
      * key - parent id , value - 所有的子节点ID的集合.
      */
-    private HashIntObjMap<IntCollection> pid2ChildrenMap;
+    private HashLongObjMap<LongCollection> pid2ChildrenMap;
     /**
      * 保存数据.key - id , value - 此id对应的节点.
      */
-    private HashIntObjMap<E> id2NodeMap;
+    private HashLongObjMap<E> id2NodeMap;
     /**
      * 保存数据.key - id , value - 此id对应的节点的深度.
      */
-    private HashIntIntMap id2DepthMap;
+    private HashLongIntMap id2DepthMap;
 
     /**
      * 如果node ID等于改值,表示此ID不存在.
      */
-    public final int NOT_EXIST = Integer.MIN_VALUE;
+    public final long NOT_EXIST = Long.MIN_VALUE;
 
     /**
      * 构造树.
@@ -51,7 +49,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param root     根节点
      * @param recDepth 是否记录节点的深度,如果记录的话,多使用一些内存
      */
-    public IntIdMapTree(E root, boolean recDepth) {
+    public LongIdMapTree(E root, boolean recDepth) {
         validateNode(root);
         this.root = root;
         this.recDepth = recDepth;
@@ -65,7 +63,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      *
      * @param root 根节点
      */
-    public IntIdMapTree(E root) {
+    public LongIdMapTree(E root) {
         this(root, false);
     }
 
@@ -73,11 +71,11 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * init.
      */
     private void init() {
-        id2PidMap = HashIntIntMaps.newMutableMap();
-        pid2ChildrenMap = HashIntObjMaps.newMutableMap();
-        id2NodeMap = HashIntObjMaps.newMutableMap();
+        id2PidMap = HashLongLongMaps.newMutableMap();
+        pid2ChildrenMap = HashLongObjMaps.newMutableMap();
+        id2NodeMap = HashLongObjMaps.newMutableMap();
         if (recDepth) {
-            id2DepthMap = HashIntIntMaps.newMutableMap();
+            id2DepthMap = HashLongIntMaps.newMutableMap();
         }
     }
 
@@ -95,13 +93,13 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
         if (hasRelationship) {
             return;
         }
-        int childId = child.getId();
-        int parentId = parent.getId();
+        long childId = child.getId();
+        long parentId = parent.getId();
 
         id2PidMap.put(childId, parentId);
-        IntCollection children = pid2ChildrenMap.get(parentId);
+        LongCollection children = pid2ChildrenMap.get(parentId);
         if (children == null) {
-            children = HashIntSets.newMutableSet();
+            children = HashLongSets.newMutableSet();
             pid2ChildrenMap.put(parentId, children);
         }
         children.add(childId);
@@ -121,9 +119,9 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     private void setDepth(E node) {
         if (recDepth) {
             int depth = 0;
-            int id = node.getId();
+            long id = node.getId();
             if (id != root.getId()) {
-                int pid = getParent(id);
+                long pid = getParent(id);
                 int parentDepth = getDepth(pid);
                 depth = parentDepth + 1;
             }
@@ -131,9 +129,9 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
                 // 深度发生变化才更新
                 id2DepthMap.put(id, depth);
                 // 更新当前节点下的所有子节点的深度
-                int[] children = getChildren(id);
+                long[] children = getChildren(id);
                 if (children != null && children.length > 0) {
-                    for (int child : children) setDepth(get(child));
+                    for (long child : children) setDepth(get(child));
                 }
             }
         }
@@ -154,12 +152,12 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param id 节点id
      * @return 这个节点id下的所有子节点
      */
-    public int[] getChildren(int id) {
-        IntCollection children = pid2ChildrenMap.get(id);
+    public long[] getChildren(long id) {
+        LongCollection children = pid2ChildrenMap.get(id);
         if (children == null) {
             return null;
         }
-        return children.toIntArray();
+        return children.toLongArray();
     }
 
     /**
@@ -168,7 +166,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param id 节点id
      * @return 深度, 如果{@link #recDepth}设置为<code>true</code>才记录深度
      */
-    public int getDepth(int id) {
+    public int getDepth(long id) {
         if (!recDepth) {
             return NO_DEPTH;
         }
@@ -181,7 +179,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param id id
      * @return node
      */
-    public E get(int id) {
+    public E get(long id) {
         return id2NodeMap.get(id);
     }
 
@@ -195,14 +193,14 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * 比如有个节点总共只有一个上级节点,但是你并不知道这个情况,你想取回它的三个祖先,
      * 在这种情况下,第0个元素是父节点ID,第一和第二个元素的值就是{@link #NOT_EXIST}
      */
-    public int[] getAncestor(int id, int count) {
-        int[] ancestors = initArray(count, NOT_EXIST);
+    public long[] getAncestor(long id, int count) {
+        long[] ancestors = initArray(count, NOT_EXIST);
         if (ancestors == null) {
             return null;
         }
         int index = 0;
         while (index < count) {
-            int pid = getParent(id);
+            long pid = getParent(id);
             if (pid == NOT_EXIST) {
                 break;
             }
@@ -220,11 +218,11 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param initValue 初始值
      * @return 如果容量小于等于0, 则返回null
      */
-    private int[] initArray(int capacity, int initValue) {
+    private long[] initArray(int capacity, long initValue) {
         if (capacity <= 0) {
             return null;
         }
-        int[] array = new int[capacity];
+        long[] array = new long[capacity];
         for (int i = 0; i < capacity; i++) {
             array[i] = initValue;
         }
@@ -237,8 +235,8 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param id node id
      * @return 父节点, 如果不存在则返回{@link #NOT_EXIST}
      */
-    public int getParent(int id) {
-        return id2PidMap.getOrDefault(id, NOT_EXIST);
+    public long getParent(Long id) {
+        return id2PidMap.getOrDefault(id.longValue(), NOT_EXIST);
     }
 
     /**
@@ -259,12 +257,12 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param child  child
      */
     private void validateRelationship(E parent, E child) {
-        int childId = child.getId();
+        long childId = child.getId();
         if (childId == root.getId()) {
-            throwException1(childId,parent.getId());
+            throwException1(childId, parent.getId());
         }
-        int parentId = parent.getId();
-        int oldParentId = id2PidMap.getOrDefault(childId, NOT_EXIST);
+        long parentId = parent.getId();
+        long oldParentId = id2PidMap.getOrDefault(childId, NOT_EXIST);
         if (oldParentId != NOT_EXIST && oldParentId != parentId) {
             throwException2(oldParentId, parentId, childId);
         }
@@ -281,7 +279,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @return true-已经拥有正确的父子关系
      */
     private boolean alreadyHasRelationship(E parent, E child) {
-        int oldParentId = id2PidMap.getOrDefault(child.getId(), NOT_EXIST);
+        long oldParentId = id2PidMap.getOrDefault(child.getId(), NOT_EXIST);
         return oldParentId != NOT_EXIST && oldParentId == parent.getId();
     }
 
@@ -301,17 +299,17 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
      * @param fromId   开始节点ID
      * @param consumer 对遍历过程中的每个节点执行的动作
      */
-    public void traverse(int fromId, Consumer<E> consumer) {
+    public void traverse(long fromId, Consumer<E> consumer) {
         E node = get(fromId);
         if (node == null) {
             return;
         }
         consumer.accept(node);
-        int[] children = getChildren(fromId);
+        long[] children = getChildren(fromId);
         if (children == null || children.length == 0) {
             return;
         }
-        for (int child : children) {
+        for (long child : children) {
             traverse(child, consumer);
         }
     }
