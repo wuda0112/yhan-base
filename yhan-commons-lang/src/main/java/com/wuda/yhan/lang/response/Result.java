@@ -1,9 +1,6 @@
 package com.wuda.yhan.lang.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.ToString;
 
 import java.io.Serializable;
@@ -11,12 +8,11 @@ import java.io.Serializable;
 /**
  * 给客户端的响应结果.
  *
- * @param <T>
- *         响应中实际结果的类型
+ * @param <T> 响应中实际结果的类型
  * @author wuda
+ * @see PagingResult
  */
-@NoArgsConstructor
-@ToString(exclude = "resultDesc")
+@ToString
 public class Result<T> implements Serializable {
 
     /**
@@ -30,12 +26,6 @@ public class Result<T> implements Serializable {
     @Getter
     private String message;
     /**
-     * 对结果的描述.
-     */
-    @JsonIgnore
-    @Getter
-    private ResultDesc resultDesc;
-    /**
      * 返回实际结果.
      */
     @Getter
@@ -44,13 +34,10 @@ public class Result<T> implements Serializable {
     /**
      * 构建结果对象.
      *
-     * @param resultDesc
-     *         描述信息
-     * @param content
-     *         实际内容
+     * @param content    实际内容
+     * @param resultDesc 描述信息
      */
-    public Result(@NonNull ResultDesc resultDesc, T content) {
-        this.resultDesc = resultDesc;
+    public Result(T content, ResultDesc resultDesc) {
         this.code = resultDesc.getCode();
         this.message = resultDesc.getMessage();
         this.content = content;
