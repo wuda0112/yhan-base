@@ -13,5 +13,6 @@ public class IntIdPidObjectMapTreeBuilderTest extends IntIdTreeTestBase {
         IntIdPidObjectMapTreeBuilder builder = new IntIdPidObjectMapTreeBuilder();
         builder.add(tree, elements);
         print(tree, china.getId());
+        System.out.println(tree.toDot(IntIdPidElement::getName));
     }
 }

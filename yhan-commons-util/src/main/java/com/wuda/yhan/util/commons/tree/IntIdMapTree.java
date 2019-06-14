@@ -9,61 +9,63 @@ import com.koloboke.collect.set.hash.HashIntSets;
 import com.wuda.yhan.util.commons.unique.IntIdObject;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
- * 用Map的方式实现树形关系.树中节点都有一个唯一ID，并且是<code>int</code>类型.
+ * 用Map的方式实现树形关系.树中元素都有一个唯一ID，并且是<code>int</code>类型.
  *
- * @param <E> 树中节点的类型
+ * @param <E> 树中元素的类型
  * @author wuda
  */
 public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree {
 
     /**
-     * 根节点.
+     * 根元素.
      */
     private E root;
+
     /**
-     * 保存关系,子节点指向父节点.key - id ,value - parent id.
+     * 保存关系,子元素指向父元素.key - id ,value - parent id.
      */
     private HashIntIntMap id2PidMap;
     /**
-     * 保存关系,父节点指向它的所有字节点.
-     * key - parent id , value - 所有的子节点ID的集合.
+     * 保存关系,父元素指向它的所有字元素.
+     * key - parent id , value - 所有的子元素ID的集合.
      */
     private HashIntObjMap<IntCollection> pid2ChildrenMap;
     /**
-     * 保存数据.key - id , value - 此id对应的节点.
+     * 保存数据.key - id , value - 此id对应的元素.
      */
-    private HashIntObjMap<E> id2NodeMap;
+    private HashIntObjMap<E> id2ElementMap;
     /**
-     * 保存数据.key - id , value - 此id对应的节点的深度.
+     * 保存数据.key - id , value - 此id对应的元素的深度.
      */
     private HashIntIntMap id2DepthMap;
 
     /**
-     * 如果node ID等于改值,表示此ID不存在.
+     * 如果Element ID等于改值,表示此ID不存在.
      */
     public final int NOT_EXIST = Integer.MIN_VALUE;
 
     /**
      * 构造树.
      *
-     * @param root     根节点
-     * @param recDepth 是否记录节点的深度,如果记录的话,多使用一些内存
+     * @param root     根元素
+     * @param recDepth 是否记录元素的深度,如果记录的话,多使用一些内存
      */
     public IntIdMapTree(E root, boolean recDepth) {
-        validateNode(root);
+        validateElement(root);
         this.root = root;
         this.recDepth = recDepth;
         init();
-        addNode(root);
+        addElement(root);
         setDepth(root);
     }
 
     /**
-     * 构造树.不记录节点深度.
+     * 构造树.不记录元素深度.
      *
-     * @param root 根节点
+     * @param root 根元素
      */
     public IntIdMapTree(E root) {
         this(root, false);
@@ -75,21 +77,21 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     private void init() {
         id2PidMap = HashIntIntMaps.newMutableMap();
         pid2ChildrenMap = HashIntObjMaps.newMutableMap();
-        id2NodeMap = HashIntObjMaps.newMutableMap();
+        id2ElementMap = HashIntObjMaps.newMutableMap();
         if (recDepth) {
             id2DepthMap = HashIntIntMaps.newMutableMap();
         }
     }
 
     /**
-     * 为两个节点建立父子关系.
+     * 为两个元素建立父子关系.
      *
-     * @param parent 作为父节点
-     * @param child  作为子节点
+     * @param parent 作为父元素
+     * @param child  作为子元素
      */
     public void createRelationship(E parent, E child) {
-        validateNode(parent);
-        validateNode(child);
+        validateElement(parent);
+        validateElement(child);
         validateRelationship(parent, child);
         boolean hasRelationship = alreadyHasRelationship(parent, child);
         if (hasRelationship) {
@@ -108,20 +110,20 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
 
         setDepth(child);
 
-        addNode(parent);
-        addNode(child);
+        addElement(parent);
+        addElement(child);
     }
 
     /**
-     * 设置节点的深度.节点的深度等于它父节点深度加一.如果当前节点的深度发生变化,
-     * 那么它的所有子节点的深度也会相应的更新.
+     * 设置元素的深度.元素的深度等于它父元素深度加一.如果当前元素的深度发生变化,
+     * 那么它的所有子元素的深度也会相应的更新.
      *
-     * @param node node
+     * @param element element
      */
-    private void setDepth(E node) {
+    private void setDepth(E element) {
         if (recDepth) {
             int depth = 0;
-            int id = node.getId();
+            int id = element.getId();
             if (id != root.getId()) {
                 int pid = getParent(id);
                 int parentDepth = getDepth(pid);
@@ -130,7 +132,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
             if (depth != getDepth(id)) {
                 // 深度发生变化才更新
                 id2DepthMap.put(id, depth);
-                // 更新当前节点下的所有子节点的深度
+                // 更新当前元素下的所有子元素的深度
                 int[] children = getChildren(id);
                 if (children != null && children.length > 0) {
                     for (int child : children) setDepth(get(child));
@@ -140,7 +142,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 获取根节点.
+     * 获取根元素.
      *
      * @return root
      */
@@ -149,10 +151,10 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 获取给定id所代表的节点的所有子节点id.
+     * 获取给定id所代表的元素的所有子元素id.
      *
-     * @param id 节点id
-     * @return 这个节点id下的所有子节点
+     * @param id 元素id
+     * @return 这个元素id下的所有子元素
      */
     public int[] getChildren(int id) {
         IntCollection children = pid2ChildrenMap.get(id);
@@ -163,9 +165,9 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 获取给定节点的深度.
+     * 获取给定元素的深度.
      *
-     * @param id 节点id
+     * @param id 元素id
      * @return 深度, 如果{@link #recDepth}设置为<code>true</code>才记录深度
      */
     public int getDepth(int id) {
@@ -176,24 +178,24 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 获取ID对应的节点.
+     * 获取ID对应的元素.
      *
      * @param id id
-     * @return node
+     * @return element
      */
     public E get(int id) {
-        return id2NodeMap.get(id);
+        return id2ElementMap.get(id);
     }
 
     /**
-     * 获取节点的祖先.
+     * 获取元素的祖先.
      *
-     * @param id    node id
+     * @param id    element id
      * @param count 查找祖先的个数
-     * @return 数组中第0个元素是直接父节点, 第一个元素是父节点的父节点, 依次类推.
-     * 数组中的元素, 不一定都是该节点的祖先的ID,
-     * 比如有个节点总共只有一个上级节点,但是你并不知道这个情况,你想取回它的三个祖先,
-     * 在这种情况下,第0个元素是父节点ID,第一和第二个元素的值就是{@link #NOT_EXIST}
+     * @return 数组中第0个元素是直接父元素, 第一个元素是父元素的父元素, 依次类推.
+     * 数组中的元素, 不一定都是该元素的祖先的ID,
+     * 比如有个元素总共只有一个上级元素,但是你并不知道这个情况,你想取回它的三个祖先,
+     * 在这种情况下,第0个元素是父元素ID,第一和第二个元素的值就是{@link #NOT_EXIST}
      */
     public int[] getAncestor(int id, int count) {
         int[] ancestors = initArray(count, NOT_EXIST);
@@ -232,28 +234,28 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 获取直接父节点.
+     * 获取直接父元素.
      *
-     * @param id node id
-     * @return 父节点, 如果不存在则返回{@link #NOT_EXIST}
+     * @param id element id
+     * @return 父元素, 如果不存在则返回{@link #NOT_EXIST}
      */
     public int getParent(int id) {
         return id2PidMap.getOrDefault(id, NOT_EXIST);
     }
 
     /**
-     * 校验节点.
+     * 校验元素.
      *
-     * @param node node
+     * @param element element
      */
-    private void validateNode(E node) {
-        if (node.getId() == NOT_EXIST) {
+    private void validateElement(E element) {
+        if (element.getId() == NOT_EXIST) {
             throwException0(NOT_EXIST);
         }
     }
 
     /**
-     * 验证两个节点的关系.
+     * 验证两个元素的关系.
      *
      * @param parent parent
      * @param child  child
@@ -261,7 +263,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     private void validateRelationship(E parent, E child) {
         int childId = child.getId();
         if (childId == root.getId()) {
-            throwException1(childId,parent.getId());
+            throwException1(childId, parent.getId());
         }
         int parentId = parent.getId();
         int oldParentId = id2PidMap.getOrDefault(childId, NOT_EXIST);
@@ -274,7 +276,7 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 这两个节点,在树中是否已经拥有父子关系.
+     * 这两个元素,在树中是否已经拥有父子关系.
      *
      * @param parent parent
      * @param child  child
@@ -286,33 +288,68 @@ public class IntIdMapTree<E extends IntIdObject> extends AbstractNumberIdMapTree
     }
 
     /**
-     * 节点添加到树中.
+     * 元素添加到树中.
      *
-     * @param node node
+     * @param element element
      */
-    private void addNode(E node) {
-        validateNode(node);
-        id2NodeMap.put(node.getId(), node);
+    private void addElement(E element) {
+        validateElement(element);
+        id2ElementMap.put(element.getId(), element);
     }
 
     /**
-     * Perform a depth-first traversal through this node and its descendants
+     * Perform a depth-first traversal through this element and its descendants
      *
-     * @param fromId   开始节点ID
-     * @param consumer 对遍历过程中的每个节点执行的动作
+     * @param fromId   开始元素ID
+     * @param consumer 对遍历过程中的每个元素执行的动作
      */
     public void traverse(int fromId, Consumer<E> consumer) {
-        E node = get(fromId);
-        if (node == null) {
+        E element = get(fromId);
+        if (element == null) {
             return;
         }
-        consumer.accept(node);
+        consumer.accept(element);
         int[] children = getChildren(fromId);
         if (children == null || children.length == 0) {
             return;
         }
         for (int child : children) {
             traverse(child, consumer);
+        }
+    }
+
+    /**
+     * Dumps an {@link IntIdMapTree} to a GraphViz's <code>dot</code> language description
+     * for visualization.
+     * <p>
+     * Note: larger FSM (a few thousand nodes) won't even
+     * render, don't bother.
+     *
+     * @param nodeLabelExtractor 提取元素的属性作为node label
+     * @see <a href="http://www.graphviz.org/">graphviz project</a>
+     */
+    public <R> String toDot(Function<E, R> nodeLabelExtractor) {
+        StringBuilder appender = new StringBuilder("digraph {");
+        appender.append("node [fontname=\"FangSong\" size=\"20,20\"];");
+        int id = root.getId();
+        parentPointChild(appender, id, nodeLabelExtractor);
+        appender.append("}");
+        return appender.toString();
+    }
+
+    private <R> void parentPointChild(StringBuilder appender, int pid, Function<E, R> nodeLabelExtractor) {
+        int[] children = getChildren(pid);
+        if (children == null || children.length == 0) {
+            return;
+        }
+        E parentE = get(pid);
+        for (int child : children) {
+            E childE = get(child);
+            appender.append(nodeLabelExtractor.apply(parentE))
+                    .append("->")
+                    .append(nodeLabelExtractor.apply(childE))
+                    .append(";");
+            parentPointChild(appender, child, nodeLabelExtractor);
         }
     }
 }

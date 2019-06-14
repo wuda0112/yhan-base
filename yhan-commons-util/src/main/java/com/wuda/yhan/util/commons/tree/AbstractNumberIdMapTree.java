@@ -8,7 +8,7 @@ package com.wuda.yhan.util.commons.tree;
 abstract class AbstractNumberIdMapTree {
 
     /**
-     * 是否记录节点深度.
+     * 是否记录元素深度.
      */
     protected boolean recDepth;
     /**
@@ -17,18 +17,18 @@ abstract class AbstractNumberIdMapTree {
     public final int NO_DEPTH = -1;
 
     void throwException0(Number id) {
-        throw new IllegalStateException("节点的ID不能是:" + id + ",改值被系统本身使用");
+        throw new IllegalStateException("元素的ID不能是:" + id + ",该值被系统本身使用");
     }
 
     void throwException1(Number id, Number pid) {
         throw new IllegalStateException("id=" + id + ",pid=" + pid + ",不能建立父子关系,"
-                + "因为子节点和ROOT节点的ID相等,ROOT节点不能有父节点!");
+                + "因为子元素和ROOT元素的ID相等,ROOT元素不能有父元素!");
     }
 
     void throwException2(Number oldParentId, Number parentId, Number childId) {
-        throw new IllegalStateException("子节点[ ID = " + childId + " ],已经拥有父节点( ID=" + oldParentId + " )," +
-                "因此,不能将[ ID=" + parentId + " ]的节点设置成它的父节点." +
-                "子节点只能有一个父节点");
+        throw new IllegalStateException("子元素[ ID = " + childId + " ],已经拥有父元素( ID=" + oldParentId + " )," +
+                "因此,不能将[ ID=" + parentId + " ]的元素设置成它的父元素." +
+                "子元素只能有一个父元素");
     }
 
     void throwException3(Number parentId, Number childId) {

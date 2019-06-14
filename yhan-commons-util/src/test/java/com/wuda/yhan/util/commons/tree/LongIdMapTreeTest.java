@@ -4,16 +4,16 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-public class IntIdMapTreeTest extends IntIdTreeTestBase {
+public class LongIdMapTreeTest extends LongIdTreeTestBase {
 
     /**
      * 测试父子关系互换的情形.
      */
     @Test
     public void testSwitchRelationship() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china);
-        IntIdTreeTestBase.IntIdPidElement parent = guangdong_province;
-        IntIdTreeTestBase.IntIdPidElement child = guangzhou;
+        LongIdMapTree<LongIdPidElement> tree = new LongIdMapTree<>(china);
+        LongIdTreeTestBase.LongIdPidElement parent = guangdong_province;
+        LongIdTreeTestBase.LongIdPidElement child = guangzhou;
 
         try {
             tree.createRelationship(parent, child);
@@ -29,10 +29,10 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase {
      */
     @Test
     public void testChildHasMultiParent() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china);
-        IntIdTreeTestBase.IntIdPidElement parent = guangdong_province;
-        IntIdTreeTestBase.IntIdPidElement child = guangzhou;
-        IntIdTreeTestBase.IntIdPidElement fakeParent = hunan_province;
+        LongIdMapTree<LongIdPidElement> tree = new LongIdMapTree<>(china);
+        LongIdPidElement parent = guangdong_province;
+        LongIdPidElement child = guangzhou;
+        LongIdPidElement fakeParent = hunan_province;
         try {
             tree.createRelationship(parent, child);
             tree.createRelationship(fakeParent, child);
@@ -47,20 +47,20 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase {
      */
     @Test
     public void test() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = getTree();
-        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
+        LongIdMapTree<LongIdPidElement> tree = getTree();
+        LongIdPidElement root = tree.getRoot();
         print(tree, root.getId());
     }
 
     @Test
     public void getAncestorsTest() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = getTree();
+        LongIdMapTree<LongIdPidElement> tree = getTree();
 
-        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
-        int[] ancestors = tree.getAncestor(root.getId(), 3);
+        LongIdPidElement root = tree.getRoot();
+        long[] ancestors = tree.getAncestor(root.getId(), 3);
         System.out.println(Arrays.toString(ancestors));
 
-        int[] zjjAncestors = tree.getAncestor(zhangjj.getId(), 4);
+        long[] zjjAncestors = tree.getAncestor(zhangjj.getId(), 4);
         System.out.println(Arrays.toString(zjjAncestors));
     }
 
@@ -69,7 +69,7 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase {
      */
     @Test
     public void testDepth() {
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china, true);
+        LongIdMapTree<LongIdPidElement> tree = new LongIdMapTree<>(china, true);
 
         // 从下往上建立关系
         tree.createRelationship(zhangjj, sangzhi);
@@ -80,13 +80,13 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase {
         tree.createRelationship(china, guangdong_province);
 
 
-        IntIdTreeTestBase.IntIdPidElement root = tree.getRoot();
+        LongIdPidElement root = tree.getRoot();
         print(tree, root.getId());
     }
 
-    private IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> getTree() {
+    private LongIdMapTree<LongIdPidElement> getTree() {
 
-        IntIdMapTree<IntIdTreeTestBase.IntIdPidElement> tree = new IntIdMapTree<>(china, true);
+        LongIdMapTree<LongIdPidElement> tree = new LongIdMapTree<>(china, true);
 
         tree.createRelationship(china, guangdong_province);
         tree.createRelationship(guangdong_province, guangzhou);
@@ -98,8 +98,8 @@ public class IntIdMapTreeTest extends IntIdTreeTestBase {
     }
 
     @Test
-    public void toDot(){
-        System.out.println(getTree().toDot(IntIdPidElement::getName));
+    public void toDot() {
+        System.out.println(getTree().toDot(LongIdPidElement::getName));
     }
 
 }
