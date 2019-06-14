@@ -6,7 +6,7 @@ import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static com.wuda.yhan.util.spring.integration.swagger.Swagger2Properties.prefix;
+import static com.wuda.yhan.util.spring.integration.swagger.SwaggerProperties.prefix;
 
 /**
  * swagger2 属性信息.
@@ -18,9 +18,9 @@ import static com.wuda.yhan.util.spring.integration.swagger.Swagger2Properties.p
 @ToString
 @Component
 @ConfigurationProperties(prefix = prefix)
-public class Swagger2Properties {
+public class SwaggerProperties {
 
-    final static String prefix = "swagger2";
+    final static String prefix = "swagger";
 
     private String basePackage;
     private String title;
